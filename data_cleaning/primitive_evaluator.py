@@ -6,6 +6,9 @@ samples, attributes_names = read(task)
 classes = read_classes(task)
 
 ranking = []
+
+print(samples)
+
 for i in range(len(attributes_names)):
     population_per_class = {class_id: [] for class_name, class_id in classes}
 
@@ -38,5 +41,33 @@ for sample in samples:
     sample.attributes = new_attributes
 
 r_names_lines = [x[0] + '\n' for x in ranking]
-r_data_lines = [','.join(s.attributes) + '\n' for s in samples]
+r_data_lines = [s.classification + ',' + ','.join(s.attributes) + '\n' for s in samples]
 write_ranked(task, r_names_lines, r_data_lines)
+
+r_samples, r_names = read(task, ranked=True)
+print('\nThere is: ' + str(len(r_samples)) + ' samples.\n')
+for sample in r_samples:
+    empty_values = 0
+    for attr in sample.attributes:
+        if attr == '?':
+            empty_values = empty_values + 1
+    print('Sample nr: ' + str(r_samples.index(sample)) + ' contains ' + str(empty_values) + ' empty values.')
+
+not_full_samples = 0
+for sample in r_samples:
+    if len(list(filter(lambda x: x == '?', sample.attributes))) != 0:
+        not_full_samples = not_full_samples + 1
+print('\nThere is ' + str(not_full_samples) + ' that have empty values.\n')
+
+not_full_samples_without_protime = 0
+for sample in r_samples:
+    if len(list(filter(lambda x: x == '?' and x.index != r_names.index('PROTIME'), sample.attributes))) != 0:
+        not_full_samples_without_protime = not_full_samples_without_protime + 1
+print('\nThere is ' + str(not_full_samples_without_protime) + ' that have empty values (protime not included).\n')
+
+for name in r_names:
+    empty_values = 0
+    for sample in r_samples:
+        if sample.attributes[r_names.index(name)] == '?':
+            empty_values = empty_values + 1
+    print('Attribute: ' + name + ' contains ' + str(empty_values) + ' empty values.')

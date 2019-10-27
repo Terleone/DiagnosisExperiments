@@ -6,12 +6,13 @@ names_file_extension = '.names'
 classes_file_extension = '.classes'
 
 
-def read(task):
-    names_file = open(ml_dir_path + '\\' + task + '\\' + task + names_file_extension, "r")
+def read(task, ranked=False):
+    ranked_prefix = 'r_' if ranked else ''
+    names_file = open(ml_dir_path + '\\' + task + '\\' + ranked_prefix + task + names_file_extension, "r")
     names = [line.strip() for line in names_file.readlines()]
     names_file.close()
 
-    data_file = open(ml_dir_path + '\\' + task + '\\' + task + data_file_extension, "r")
+    data_file = open(ml_dir_path + '\\' + task + '\\' + ranked_prefix + task + data_file_extension, "r")
     sample_lines = data_file.readlines()
     data_file.close()
 
@@ -22,12 +23,12 @@ def read(task):
     return samples, names
 
 
-def write_ranked(folder, names_lines, data_lines):
-    r_names_file = open(ml_dir_path + '\\' + folder + '\\' + 'r_' + folder + names_file_extension, "w+")
+def write_ranked(task, names_lines, data_lines):
+    r_names_file = open(ml_dir_path + '\\' + task + '\\' + 'r_' + task + names_file_extension, "w+")
     r_names_file.writelines(names_lines)
     r_names_file.close()
 
-    r_data_file = open(ml_dir_path + '\\' + folder + '\\' + 'r_' + folder + data_file_extension, "w+")
+    r_data_file = open(ml_dir_path + '\\' + task + '\\' + 'r_' + task + data_file_extension, "w+")
     r_data_file.writelines(data_lines)
     r_data_file.close()
 
