@@ -44,6 +44,8 @@ r_names_lines = [x[0] + '\n' for x in ranking]
 r_data_lines = [s.classification + ',' + ','.join(s.attributes) + '\n' for s in samples]
 write_ranked(task, r_names_lines, r_data_lines)
 
+# Script that finds empty values
+"""
 r_samples, r_names = read(task, ranked=True)
 print('\nThere is: ' + str(len(r_samples)) + ' samples.\n')
 for sample in r_samples:
@@ -71,3 +73,4 @@ for name in r_names:
         if sample.attributes[r_names.index(name)] == '?':
             empty_values = empty_values + 1
     print('Attribute: ' + name + ' contains ' + str(empty_values) + ' empty values.')
+"""
