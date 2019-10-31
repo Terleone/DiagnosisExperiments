@@ -6,7 +6,7 @@ names_file_extension = '.names'
 classes_file_extension = '.classes'
 
 
-def read(task, file_type=''):
+def read(task, file_type='f'):
     check_file_type(file_type)
     names_file = open(ml_dir_path + '\\' + task + '\\' + file_type + '_' + task + names_file_extension, "r")
     names = [line.strip() for line in names_file.readlines()]
@@ -20,6 +20,12 @@ def read(task, file_type=''):
     for line in sample_lines:
         features = [element.strip() for element in line.split(',')]
         samples.append(Sample(features[0], features[1:]))
+
+    if file_type in ['r']:
+        for i in range(len(samples)):
+            attributes = samples[i].attributes
+            samples[i].attributes = [float(attr) for attr in attributes]
+
     return samples, names
 
 
@@ -45,5 +51,5 @@ def read_classes(task):
 
 
 def check_file_type(file_type):
-    if file_type not in ['', 'c', 'r']:
+    if file_type not in ['f', 'c', 'r']:
         raise Exception('File type is wrong.')

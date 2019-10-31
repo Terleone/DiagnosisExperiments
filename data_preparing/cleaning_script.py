@@ -2,7 +2,7 @@ from xlwt import Workbook
 from data_preparing.cleaner import handle_missing_values
 from tools.io_handlers import read, write, read_classes
 
-task = 'hepatitis'
+task = 'breast'
 flow = 'plain'
 
 samples, names = read(task)
@@ -10,7 +10,9 @@ classes = read_classes(task)
 c_samples, c_names = handle_missing_values(samples, names, "average", 5, 5)
 
 if flow == 'plain':
-    write(task, 'c')
+    c_names_lines = [x + '\n' for x in c_names]
+    c_data_lines = [s.classification + ',' + ','.join(s.attributes) + '\n' for s in c_samples]
+    write(task, c_names_lines, c_data_lines, 'c')
 else:
     wb = Workbook()
     sheet = wb.add_sheet('Sheet 1')

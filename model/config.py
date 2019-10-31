@@ -2,7 +2,6 @@ class Config:
     hidden_layer_size = 8
     features = 4
     epochs = 10
-    stratify = True
     momentum = True
 
     data_folder = 'hepatitis'

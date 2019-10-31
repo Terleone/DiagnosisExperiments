@@ -2,7 +2,7 @@ import keras
 import tensorflow
 
 
-def train_test_iteration(config, data):
+def train_test_iteration(config, data, ann_type):
     for sample in data:
         test_attributes = [].append(sample.attributes)
         test_labels = [].append(sample.classification)

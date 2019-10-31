@@ -46,7 +46,7 @@ def fill_missing_data(samples, method):
         for sample in samples:
             for i in range(0, features):
                 if sample.attributes[i] == '?':
-                    sample.attributes[i] = averages[i]
+                    sample.attributes[i] = str(averages[i])
     elif method == 'median':
         medians = []
         for i in range(0, features):
@@ -58,4 +58,4 @@ def fill_missing_data(samples, method):
         for sample in samples:
             for i in range(0, features):
                 if sample.attributes[i] == '?':
-                    sample.attributes[i] = medians[i]
+                    sample.attributes[i] = str(medians[i])
