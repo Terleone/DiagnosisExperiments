@@ -1,8 +1,8 @@
 from scipy.stats import stats
-from tools.io_handlers import read, write_ranked, read_classes
+from tools.io_handlers import read, write, read_classes
 
 task = 'hepatitis'
-samples, attributes_names = read(task)
+samples, attributes_names = read(task, 'c')
 classes = read_classes(task)
 
 ranking = []
@@ -42,7 +42,7 @@ for sample in samples:
 
 r_names_lines = [x[0] + '\n' for x in ranking]
 r_data_lines = [s.classification + ',' + ','.join(s.attributes) + '\n' for s in samples]
-write_ranked(task, r_names_lines, r_data_lines)
+write(task, r_names_lines, r_data_lines, 'r')
 
 # Script that finds empty values
 """
