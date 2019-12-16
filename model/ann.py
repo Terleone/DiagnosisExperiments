@@ -1,29 +1,41 @@
 import keras
-import tensorflow
+import numpy as np
+from sklearn.metrics import matthews_corrcoef
 
 
-def train_test_iteration(config, data, ann_type):
+def train_test_iteration(config, data):
+    y_true = []
+    y_pred = []
+
+    train_set_size = len(data) - 1
     for sample in data:
-        test_attributes = [].append(sample.attributes)
-        test_labels = [].append(sample.classification)
-        train_attributes = [i.attributes for i in list(filter(lambda s: s != sample, data))]
-        train_labels = [i.classification for i in list(filter(lambda s: s != sample, data))]
+        train_samples = [i for i in list(filter(lambda s: s != sample, data))]
+
+        train_attributes = np.empty(shape=(train_set_size, config.features))
+        train_labels = np.empty(shape=(train_set_size,))
+        for i in range(len(train_samples)):
+            _sample = train_samples[i]
+            train_attributes[i] = _sample.attributes[0:config.features]
+            train_labels[i] = _sample.classification
+
+        sample.attributes = sample.attributes[0:config.features]
+        test_attributes = np.empty(shape=(1, config.features))
+        test_labels = np.empty(shape=(1,))
+        for i in range(len(sample.attributes)):
+            test_attributes[0][i] = sample.attributes[i]
+        test_labels[0] = sample.classification
 
         model = keras.Sequential([
-            keras.layers.Flatten(input_shape=(config.features,)),
-            keras.layers.Dense(config.hidden_layer_size, activation=tensorflow.nn.relu),
-            keras.layers.Dense(2, activation=tensorflow.nn.softmax)
+            keras.layers.Dense(config.features, input_shape=(config.features, )),
+            keras.layers.Dense(config.hidden_layer_size, activation='relu'),
+            keras.layers.Dense(1, activation='softmax')
         ])
-        model.compile(optimizer=keras.optimizers.SGD(lr=0.01, momentum=(1.0 if config.momentum else 0.0),
-                                                     decay=0.0, nesterov=False),
-                      loss='mean_absolute_error',
-                      metrics=['accuracy'])
-        model.fit(x=train_attributes, y=train_labels, batch_size=1, epochs=config.epochs,
-                  verbose=1)  # if not config.silent else 0)
-    model.fit(x=train_attributes, y=train_labels, batch_size=1, epochs=config.epochs,
-              verbose=1)  # if not config.silent else 0)
-    y_pred = model.predict_classes(test_attributes, 1)
-    scores = model.evaluate(test_attributes, test_labels)
-    # if not self.silent:
-    print("\n%s: %.2f%%" % (model.metrics_names[1], scores[1] * 100))
-    return scores[1], test_labels, y_pred
+        model.compile(optimizer=keras.optimizers.Adam(),
+                      loss='mean_squared_error',
+                      metrics=['accuracy'])#=[matthews_corrcoef])
+        model.fit(x=train_attributes, y=train_labels, batch_size=len(train_labels), epochs=config.epochs,
+                  verbose=1 if not config.silent else 0)
+
+        y_true.append(int(test_labels[0]))
+        y_pred.append(int(model.predict(test_attributes).item(0)))
+    return matthews_corrcoef(np.asarray(y_true, dtype=int), np.asarray(y_pred, dtype=int))

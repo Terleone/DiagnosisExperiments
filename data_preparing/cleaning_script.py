@@ -2,12 +2,20 @@ from xlwt import Workbook
 from data_preparing.cleaner import handle_missing_values
 from tools.io_handlers import read, write, read_classes
 
-task = 'breast'
+task = 'hepatitis'
 flow = 'plain'
 
 samples, names = read(task)
 classes = read_classes(task)
 c_samples, c_names = handle_missing_values(samples, names, "average", 5, 5)
+
+for c_sample in c_samples:
+    if c_sample.classification == '1':
+        c_sample.classification = '0'
+    elif c_sample.classification == '2':
+        c_sample.classification = '1'
+    else:
+        raise Exception('Wrong encoding of classes.')
 
 if flow == 'plain':
     c_names_lines = [x + '\n' for x in c_names]

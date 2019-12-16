@@ -1,7 +1,7 @@
 from scipy.stats import stats
 from tools.io_handlers import read, write, read_classes
 
-task = 'breast'
+task = 'hepatitis'
 samples, names = read(task, 'c')
 classes = read_classes(task)
 

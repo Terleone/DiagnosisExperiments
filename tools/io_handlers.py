@@ -1,5 +1,6 @@
 from model.sample import Sample
 from tools import ml_dir_path
+import matplotlib.pyplot as plt
 
 data_file_extension = '.data'
 names_file_extension = '.names'
@@ -53,3 +54,16 @@ def read_classes(task):
 def check_file_type(file_type):
     if file_type not in ['f', 'c', 'r']:
         raise Exception('File type is wrong.')
+
+
+def print_chart(x, y, x_label, y_label, title):
+    plt.title(title)
+    plt.xlabel(x_label)
+    plt.ylabel(y_label)
+    plt.plot(x, y, 'bo')
+    ###
+    plt.show()
+    ###
+    plt.savefig('chart_' + x_label + '&' + y_label + '.png')
+    plt.clf()
+    plt.close()
