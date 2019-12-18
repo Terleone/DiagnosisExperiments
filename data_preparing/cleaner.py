@@ -1,3 +1,9 @@
+import math
+
+import numpy as np
+from sklearn.preprocessing import normalize
+
+
 def handle_missing_values(samples, names, method, sample_tolerance, feature_tolerance):
     if sample_tolerance >= 0:
         samples = filter_samples(samples, sample_tolerance)
@@ -59,3 +65,23 @@ def fill_missing_data(samples, method):
             for i in range(0, features):
                 if sample.attributes[i] == '?':
                     sample.attributes[i] = str(medians[i])
+
+
+def balance_data(data):
+    zero_class_samples = [i for i in data if i.classification == 0.0]
+    one_class_samples = [i for i in data if i.classification == 1.0]
+    multiplier = math.ceil(len(one_class_samples) / len(zero_class_samples))
+
+    for i in range(multiplier - 1):
+        data += zero_class_samples
+    np.random.shuffle(data)
+
+
+def normalize_data(data):
+    attributes = np.empty(shape=(len(data), len(data[0].attributes)))
+    for i in range(len(data)):
+        sample = data[i]
+        attributes[i] = sample.attributes
+    attributes = normalize(attributes)
+    for i in range(len(data)):
+        data[i].attributes = attributes[i]

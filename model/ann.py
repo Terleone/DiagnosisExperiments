@@ -1,4 +1,5 @@
 import keras
+from keras import backend as K
 import numpy as np
 from sklearn.metrics import matthews_corrcoef
 
@@ -26,16 +27,44 @@ def train_test_iteration(config, data):
         test_labels[0] = sample.classification
 
         model = keras.Sequential([
-            keras.layers.Dense(config.features, input_shape=(config.features, )),
-            keras.layers.Dense(config.hidden_layer_size, activation='relu'),
-            keras.layers.Dense(1, activation='softmax')
+            keras.layers.Dense(256, input_shape=(config.features, )),
+            keras.layers.Dense(192, activation='relu'),
+            #keras.layers.Dense(128, activation='relu'),
+            #keras.layers.Dense(64, activation='relu'),
+            #keras.layers.Dense(64, activation='relu'),
+            #keras.layers.Dense(64, activation='relu'),
+            #keras.layers.Dense(64, activation='relu'),
+            keras.layers.Dense(64, activation='relu'),
+            #keras.layers.Dense(1, activation='softmax')
+            keras.layers.Dense(1, activation='relu')
         ])
         model.compile(optimizer=keras.optimizers.Adam(),
                       loss='mean_squared_error',
-                      metrics=['accuracy'])#=[matthews_corrcoef])
-        model.fit(x=train_attributes, y=train_labels, batch_size=len(train_labels), epochs=config.epochs,
+                      metrics=[matthews_correlation])
+        model.fit(x=train_attributes, y=train_labels, batch_size=len(train_attributes), epochs=config.epochs,
                   verbose=1 if not config.silent else 0)
 
-        y_true.append(int(test_labels[0]))
-        y_pred.append(int(model.predict(test_attributes).item(0)))
-    return matthews_corrcoef(np.asarray(y_true, dtype=int), np.asarray(y_pred, dtype=int))
+        y_true.append((test_labels[0] - 0.5) * 2)
+        y_pred.append((model.predict(test_attributes).item(0) - 0.5) * 2)
+    return matthews_corrcoef(np.asarray(y_true, dtype=np.float),
+                             np.asarray([-1 if i < 0 else 1 for i in y_pred], dtype=np.float))
+                             #np.asarray(y_pred, dtype=np.float))
+
+
+def matthews_correlation(y_true, y_pred):
+    ''' Matthews correlation coefficient
+    '''
+    y_pred_pos = K.round(K.clip(y_pred, 0, 1))
+    y_pred_neg = 1 - y_pred_pos
+    y_pos = K.round(K.clip(y_true, 0, 1))
+    y_neg = 1 - y_pos
+    tp = K.sum(y_pos * y_pred_pos)
+    tn = K.sum(y_neg * y_pred_neg)
+
+    fp = K.sum(y_neg * y_pred_pos)
+    fn = K.sum(y_pos * y_pred_neg)
+
+    numerator = (tp * tn - fp * fn)
+    denominator = K.sqrt((tp + fp) * (tp + fn) * (tn + fp) * (tn + fn))
+
+    return numerator / (denominator + K.epsilon())

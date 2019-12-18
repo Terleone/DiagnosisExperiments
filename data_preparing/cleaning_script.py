@@ -7,19 +7,17 @@ flow = 'plain'
 
 samples, names = read(task)
 classes = read_classes(task)
-c_samples, c_names = handle_missing_values(samples, names, "average", 5, 5)
+c_samples, c_names = handle_missing_values(samples, names, "average", -1, -1)
 
 for c_sample in c_samples:
-    if c_sample.classification == '1':
-        c_sample.classification = '0'
-    elif c_sample.classification == '2':
-        c_sample.classification = '1'
+    if c_sample.classification in [1.0, 2.0]:
+        c_sample.classification -= 1
     else:
         raise Exception('Wrong encoding of classes.')
 
 if flow == 'plain':
     c_names_lines = [x + '\n' for x in c_names]
-    c_data_lines = [s.classification + ',' + ','.join(s.attributes) + '\n' for s in c_samples]
+    c_data_lines = [str(int(s.classification)) + ',' + ','.join(s.attributes) + '\n' for s in c_samples]
     write(task, c_names_lines, c_data_lines, 'c')
 else:
     wb = Workbook()
