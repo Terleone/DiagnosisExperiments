@@ -63,7 +63,7 @@ def print_chart(x, y, x_label, y_label, title):
     plt.ylabel(y_label)
     plt.plot(x, y, 'bo')
     ###
-    plt.show()
+    #plt.show()
     ###
     plt.savefig('chart_' + x_label + '&' + y_label + '.png')
     plt.clf()

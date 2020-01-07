@@ -1,7 +1,7 @@
 from data_preparing.cleaner import balance_data, normalize_data
 from tools.io_handlers import read, write
 
-task = 'hepatitis'
+task = 'breast'
 
 samples, names = read(task, 'c')
 

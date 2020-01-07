@@ -26,18 +26,31 @@ def train_test_iteration(config, data):
             test_attributes[0][i] = sample.attributes[i]
         test_labels[0] = sample.classification
 
+        layers = config.layers
+        model = keras.Sequential()
+        for layer_index in range(len(layers)):
+            if layer_index == 0:
+                model.add(keras.layers.Dense(layers[layer_index], input_shape=(config.features,)))
+            else:
+                model.add(keras.layers.Dense(layers[layer_index], activation='relu'))
+        model.add(keras.layers.Dense(1, activation='relu'))
+        #model.add(keras.layers.Dense(1, activation='softmax')
+
+        """
         model = keras.Sequential([
             keras.layers.Dense(256, input_shape=(config.features, )),
             keras.layers.Dense(192, activation='relu'),
-            #keras.layers.Dense(128, activation='relu'),
-            #keras.layers.Dense(64, activation='relu'),
-            #keras.layers.Dense(64, activation='relu'),
-            #keras.layers.Dense(64, activation='relu'),
-            #keras.layers.Dense(64, activation='relu'),
+            keras.layers.Dense(128, activation='relu'),
+            keras.layers.Dense(64, activation='relu'),
+            keras.layers.Dense(64, activation='relu'),
+            keras.layers.Dense(64, activation='relu'),
+            keras.layers.Dense(64, activation='relu'),
             keras.layers.Dense(64, activation='relu'),
             #keras.layers.Dense(1, activation='softmax')
             keras.layers.Dense(1, activation='relu')
         ])
+        """
+
         model.compile(optimizer=keras.optimizers.Adam(),
                       loss='mean_squared_error',
                       metrics=[matthews_correlation])
@@ -46,6 +59,7 @@ def train_test_iteration(config, data):
 
         y_true.append((test_labels[0] - 0.5) * 2)
         y_pred.append((model.predict(test_attributes).item(0) - 0.5) * 2)
+
     return matthews_corrcoef(np.asarray(y_true, dtype=np.float),
                              np.asarray([-1 if i < 0 else 1 for i in y_pred], dtype=np.float))
                              #np.asarray(y_pred, dtype=np.float))
