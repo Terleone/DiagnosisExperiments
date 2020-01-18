@@ -4,7 +4,7 @@ import numpy as np
 from sklearn.metrics import matthews_corrcoef
 
 
-def train_test_iteration(config, data):
+def train_test_iteration(config, data, return_y_pred=False):
     y_true = []
     y_pred = []
 
@@ -60,6 +60,8 @@ def train_test_iteration(config, data):
         y_true.append((test_labels[0] - 0.5) * 2)
         y_pred.append((model.predict(test_attributes).item(0) - 0.5) * 2)
 
+    if return_y_pred:
+        return y_pred
     return matthews_corrcoef(np.asarray(y_true, dtype=np.float),
                              np.asarray([-1 if i < 0 else 1 for i in y_pred], dtype=np.float))
                              #np.asarray(y_pred, dtype=np.float))
