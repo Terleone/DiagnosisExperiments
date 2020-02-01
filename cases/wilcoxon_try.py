@@ -1,7 +1,7 @@
 import xlwt
 from xlwt import Workbook
 from scipy.stats import wilcoxon
-from model.ai import train_test_iteration
+from model.ai import loo_train_test_iteration
 from model.configs import AnnConfig
 from tools.io_handlers import read, print_chart
 
@@ -23,7 +23,7 @@ epochs = 1000
 batch_size = len(samples) - 1
 for i in range(len(layers)):
     config = AnnConfig(layers[i], features, epochs, batch_size, data_folder)
-    results.append(train_test_iteration(config, samples, False, True))
+    results.append(loo_train_test_iteration(config, samples, False, True))
 
 style_red = xlwt.easyxf('pattern: pattern solid, fore_colour red;')
 style_green = xlwt.easyxf('pattern: pattern solid, fore_colour green;')
@@ -58,7 +58,7 @@ batch_sizes = [float(len(samples) - 1) / 4,
 
 for i in range(len(batch_sizes)):
     config = AnnConfig(layers, features, epochs, batch_sizes[i], data_folder)
-    results.append(train_test_iteration(config, samples, False, True))
+    results.append(loo_train_test_iteration(config, samples, False, True))
 
 sheet2 = wb.add_sheet('Steps')
 sheet2.write(0, 0, 'Step')
@@ -86,7 +86,7 @@ batch_size = float(len(samples) - 1) / 2
 
 for i in range(len(epochs)):
     config = AnnConfig(layers, features, epochs[i], batch_size, data_folder)
-    results.append(train_test_iteration(config, samples, False, True))
+    results.append(loo_train_test_iteration(config, samples, False, True))
 
 sheet3 = wb.add_sheet('Epochs')
 sheet3.write(0, 0, 'Epoch')

@@ -1,4 +1,4 @@
-from model.ai import train_test_iteration
+from model.ai import loo_train_test_iteration
 from model.configs import AnnConfig
 from tools.io_handlers import read, print_chart
 
@@ -15,7 +15,7 @@ batch_size = len(samples) - 1
 
 for i in range(len(epochs)):
     config = AnnConfig(layers, features, epochs[i], batch_size, data_folder)
-    results.append(train_test_iteration(config, samples, use_tree=False))
+    results.append(loo_train_test_iteration(config, samples, use_tree=False))
 
 file = open("My mcc dependency of epochs", "w+")
 for i in range(len(epochs)):

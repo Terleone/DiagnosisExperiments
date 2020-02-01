@@ -2,10 +2,11 @@ import keras
 from keras import backend as K
 import numpy as np
 from sklearn.metrics import matthews_corrcoef
+from sklearn.model_selection import KFold, StratifiedKFold
 from sklearn.tree import DecisionTreeClassifier
 
 
-def train_test_iteration(config, data, use_tree, return_y_pred=False):
+def loo_train_test_iteration(config, data, use_tree, return_y_pred=False):
     y_true = []
     y_pred = []
 
@@ -38,6 +39,22 @@ def train_test_iteration(config, data, use_tree, return_y_pred=False):
                              #np.asarray(y_pred, dtype=np.float))
 
 
+def k_fold_train_test_iteration(config, data, use_tree=True):
+    skf = StratifiedKFold(n_splits=10)
+    X = np.array([s.attributes[0:config.features] for s in data])
+    y = np.array([s.classification for s in data])
+    results = []
+    for train_index, test_index in skf.split(X, y):
+        X_train, X_test = X[train_index], X[test_index]
+        y_train, y_test = y[train_index], y[test_index]
+        y_true = [(i - 0.5) * 2 for i in y_test]
+        y_pred = [(i - 0.5) * 2 for i in (train_test_tree(config, X_train, y_train, X_test)
+                                          if use_tree else train_test_ann(config, X_train, y_train, X_test))]
+        results.append(matthews_corrcoef(np.asarray(y_true, dtype=np.float),
+                          np.asarray([-1 if i < 0 else 1 for i in y_pred], dtype=np.float)))
+    return results
+
+
 def matthews_correlation(y_true, y_pred):
     y_pred_pos = K.round(K.clip(y_pred, 0, 1))
     y_pred_neg = 1 - y_pred_pos
@@ -66,21 +83,6 @@ def train_test_ann(config, train_attributes, train_labels, test_attributes):
     model.add(keras.layers.Dense(1, activation='relu'))
     # model.add(keras.layers.Dense(1, activation='softmax')
 
-    """
-    model = keras.Sequential([
-        keras.layers.Dense(256, input_shape=(config.features, )),
-        keras.layers.Dense(192, activation='relu'),
-        keras.layers.Dense(128, activation='relu'),
-        keras.layers.Dense(64, activation='relu'),
-        keras.layers.Dense(64, activation='relu'),
-        keras.layers.Dense(64, activation='relu'),
-        keras.layers.Dense(64, activation='relu'),
-        keras.layers.Dense(64, activation='relu'),
-        #keras.layers.Dense(1, activation='softmax')
-        keras.layers.Dense(1, activation='relu')
-    ])
-    """
-
     model.compile(optimizer=keras.optimizers.Adam(),
                   loss='mean_squared_error',
                   metrics=[matthews_correlation])
@@ -93,6 +95,4 @@ def train_test_tree(config, train_attributes, train_labels, test_attributes):
     classifier = DecisionTreeClassifier()
     classifier.fit(train_attributes, train_labels)
     predicted = classifier.predict(X=test_attributes)
-    #predicted_proba = classifier.predict_proba(X=test_attributes)
-    # print(predicted)
     return predicted
