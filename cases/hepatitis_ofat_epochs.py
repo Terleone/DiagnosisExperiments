@@ -1,5 +1,5 @@
-from model.ann import train_test_iteration
-from model.config import Config
+from model.ai import train_test_iteration
+from model.configs import AnnConfig
 from tools.io_handlers import read, print_chart
 
 """Trzeci dostrajany parametr"""
@@ -14,8 +14,8 @@ epochs = [10, 50, 100, 500, 1000, 10000]
 batch_size = len(samples) - 1
 
 for i in range(len(epochs)):
-    config = Config(layers, features, epochs[i], batch_size, data_folder)
-    results.append(train_test_iteration(config, samples))
+    config = AnnConfig(layers, features, epochs[i], batch_size, data_folder)
+    results.append(train_test_iteration(config, samples, use_tree=False))
 
 file = open("My mcc dependency of epochs", "w+")
 for i in range(len(epochs)):
