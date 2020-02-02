@@ -1,6 +1,6 @@
 from model.ai import loo_train_test_iteration
 from model.configs import AnnConfig
-from tools.io_handlers import read, print_chart
+from tools.io_handlers import read
 
 """Trzeci dostrajany parametr"""
 

@@ -1,12 +1,12 @@
 import keras
-from keras import backend as K
 import numpy as np
+from keras import backend as K
 from sklearn.metrics import matthews_corrcoef
-from sklearn.model_selection import KFold, StratifiedKFold
+from sklearn.model_selection import StratifiedKFold
 from sklearn.tree import DecisionTreeClassifier
 
 
-def loo_train_test_iteration(config, data, use_tree, return_y_pred=False):
+def loo_train_test_iteration(config, data, use_tree):
     y_true = []
     y_pred = []
 
@@ -29,14 +29,17 @@ def loo_train_test_iteration(config, data, use_tree, return_y_pred=False):
         test_labels[0] = sample.classification
 
         y_true.append((test_labels[0] - 0.5) * 2)
-        y_pred.append((train_test_tree(config, train_attributes, train_labels, test_attributes) - 0.5) * 2 if use_tree
-                      else (train_test_ann(config, train_attributes, train_labels, test_attributes) - 0.5) * 2)
+        y_pred.append((train_test_tree(train_attributes, train_labels, test_attributes)[0] - 0.5) * 2 if use_tree
+                      else (train_test_ann(config, train_attributes, train_labels, test_attributes)[0] - 0.5) * 2)
 
-    if return_y_pred:
-        return y_pred
+    '''
+    If you want to use softmax then for last layer of ann use
+    model.add(keras.layers.Dense(1, activation='softmax')
+    and as the second argument of MCC pass
+    np.asarray(y_pred, dtype=np.float).
+    '''
     return matthews_corrcoef(np.asarray(y_true, dtype=np.float),
                              np.asarray([-1 if i < 0 else 1 for i in y_pred], dtype=np.float))
-                             #np.asarray(y_pred, dtype=np.float))
 
 
 def k_fold_train_test_iteration(config, data, use_tree=True):
@@ -48,7 +51,7 @@ def k_fold_train_test_iteration(config, data, use_tree=True):
         X_train, X_test = X[train_index], X[test_index]
         y_train, y_test = y[train_index], y[test_index]
         y_true = [(i - 0.5) * 2 for i in y_test]
-        y_pred = [(i - 0.5) * 2 for i in (train_test_tree(config, X_train, y_train, X_test)
+        y_pred = [(i - 0.5) * 2 for i in (train_test_tree(X_train, y_train, X_test)
                                           if use_tree else train_test_ann(config, X_train, y_train, X_test))]
         results.append(matthews_corrcoef(np.asarray(y_true, dtype=np.float),
                           np.asarray([-1 if i < 0 else 1 for i in y_pred], dtype=np.float)))
@@ -81,17 +84,16 @@ def train_test_ann(config, train_attributes, train_labels, test_attributes):
         else:
             model.add(keras.layers.Dense(layers[layer_index], activation='relu'))
     model.add(keras.layers.Dense(1, activation='relu'))
-    # model.add(keras.layers.Dense(1, activation='softmax')
 
     model.compile(optimizer=keras.optimizers.Adam(),
                   loss='mean_squared_error',
                   metrics=[matthews_correlation])
     model.fit(x=train_attributes, y=train_labels, batch_size=len(train_attributes), epochs=config.epochs,
               verbose=1 if not config.silent else 0)
-    return model.predict(test_attributes).item(0)
+    return [r.item(0) for r in model.predict(test_attributes)]#.item(0)
 
 
-def train_test_tree(config, train_attributes, train_labels, test_attributes):
+def train_test_tree(train_attributes, train_labels, test_attributes):
     classifier = DecisionTreeClassifier()
     classifier.fit(train_attributes, train_labels)
     predicted = classifier.predict(X=test_attributes)
