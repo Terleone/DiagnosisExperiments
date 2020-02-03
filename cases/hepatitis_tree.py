@@ -9,3 +9,8 @@ features = len(names)
 config = TreeConfig(features, data_folder)
 results = k_fold_train_test_iteration(config, samples)
 print(results)
+
+file = open("tree.txt", "w+")
+for i in range(len(results)):
+    file.write(str(results[i]) + '\n')
+file.close()
