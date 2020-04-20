@@ -2,6 +2,7 @@ import math
 
 import numpy as np
 from sklearn.preprocessing import normalize
+from sklearn.utils import resample
 
 
 def handle_missing_values(samples, names, method, sample_tolerance, feature_tolerance):
@@ -70,11 +71,10 @@ def fill_missing_data(samples, method):
 def balance_data(data):
     zero_class_samples = [i for i in data if i.classification == 0.0]
     one_class_samples = [i for i in data if i.classification == 1.0]
-    multiplier = math.ceil(len(one_class_samples) / len(zero_class_samples))
-
-    for i in range(multiplier - 1):
-        data += zero_class_samples
-    np.random.shuffle(data)
+    minority_upsampled = resample(zero_class_samples, replace=True, n_samples=len(one_class_samples))
+    new_data = minority_upsampled + one_class_samples
+    np.random.shuffle(new_data)
+    return new_data
 
 
 def normalize_data(data):

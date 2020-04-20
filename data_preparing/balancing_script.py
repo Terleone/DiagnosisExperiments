@@ -1,11 +1,11 @@
 from data_preparing.cleaner import balance_data, normalize_data
 from tools.io_handlers import read, write
 
-task = 'breast'
+task = 'hepatitis'
 
 samples, names = read(task, 'c')
 
-balance_data(samples)
+samples = balance_data(samples)
 normalize_data(samples)
 
 b_names_lines = [x + '\n' for x in names]
