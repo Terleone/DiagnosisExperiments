@@ -1,9 +1,4 @@
-import xlwt
-from xlwt import Workbook
 from scipy.stats import wilcoxon
-from model.ai import loo_train_test_iteration
-from model.configs import AnnConfig
-from tools.io_handlers import read, print_chart
 
 tree_file = open('tree.txt', 'r')
 tree_lines = tree_file.readlines()
