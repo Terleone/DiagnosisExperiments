@@ -1,7 +1,9 @@
+from os import path
+
+import matplotlib.pyplot as plt
+
 from model.sample import Sample
 from tools import ml_dir_path
-import matplotlib.pyplot as plt
-from os import path
 
 data_file_extension = '.data'
 names_file_extension = '.names'

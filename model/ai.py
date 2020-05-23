@@ -42,22 +42,6 @@ def loo_train_test_iteration(config, data, use_tree):
                              np.asarray([-1 if i < 0 else 1 for i in y_pred], dtype=np.float))
 
 
-def k_fold_train_test_iteration(config, data, use_tree=True):
-    skf = StratifiedKFold(n_splits=10)
-    X = np.array([s.attributes[0:config.features] for s in data])
-    y = np.array([s.classification for s in data])
-    results = []
-    for train_index, test_index in skf.split(X, y):
-        X_train, X_test = X[train_index], X[test_index]
-        y_train, y_test = y[train_index], y[test_index]
-        y_true = [(i - 0.5) * 2 for i in y_test]
-        y_pred = [(i - 0.5) * 2 for i in (train_test_tree(X_train, y_train, X_test)
-                                          if use_tree else train_test_ann(config, X_train, y_train, X_test))]
-        results.append(matthews_corrcoef(np.asarray(y_true, dtype=np.float),
-                          np.asarray([-1 if i < 0 else 1 for i in y_pred], dtype=np.float)))
-    return results
-
-
 def matthews_correlation(y_true, y_pred):
     y_pred_pos = K.round(K.clip(y_pred, 0, 1))
     y_pred_neg = 1 - y_pred_pos
@@ -98,3 +82,41 @@ def train_test_tree(train_attributes, train_labels, test_attributes):
     classifier.fit(train_attributes, train_labels)
     predicted = classifier.predict(X=test_attributes)
     return predicted
+
+
+class Pack:
+    def __init__(self, X_train, X_test, y_train, y_test):
+        self.X_train = X_train
+        self.X_test = X_test
+        self.y_train = y_train
+        self.y_test = y_test
+
+
+def stratified_kfold_split(features, data, k=10):
+    skf = StratifiedKFold(n_splits=k)
+    X = np.array([s.attributes[0:features] for s in data])
+    y = np.array([s.classification for s in data])
+    packs = []
+    for train_index, test_index in skf.split(X, y):
+        X_train, X_test = X[train_index], X[test_index]
+        y_train, y_test = y[train_index], y[test_index]
+        packs.append(Pack(X_train, X_test, y_train, y_test))
+    return packs
+
+
+def cv(config, packs, use_tree=True):
+    results = []
+    for pack in packs:
+        y_true = [(i - 0.5) * 2
+                  for i in pack.y_test]
+        y_pred = [(i - 0.5) * 2
+                  for i in (
+                      train_test_tree(
+                          pack.X_train, pack.y_train, pack.X_test
+                      ) if use_tree
+                      else train_test_ann(config, pack.X_train,
+                                          pack.y_train, pack.X_test))]
+        results.append(matthews_corrcoef(np.asarray(y_true, dtype=np.float),
+                          np.asarray([-1 if i < 0 else 1 for i in y_pred],
+                                     dtype=np.float)))
+    return results
